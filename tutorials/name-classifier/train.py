@@ -10,37 +10,11 @@ import matplotlib.pyplot as pyplot
 import matplotlib.ticker as ticker
 
 from load import all_categories, all_letters, n_categories, n_letters, category_lines
-
 from shared import letter_to_index, letter_to_tensor, line_to_tensor, category_from_output, random_training_sample
-
-class RNN(nn.Module):
-    def __init__(self, input_size, hidden_size, output_size):
-        super(RNN, self).__init__()
-
-        self.input_size = input_size
-        self.hidden_size = hidden_size
-        self.output_size = output_size
-
-        self.i2h = nn.Linear(input_size + hidden_size, hidden_size)
-        self.h2o = nn.Linear(input_size + hidden_size, output_size)
-        self.softmax = nn.Softmax(dim=1)
-
-    def forward(self, input, hidden):
-        combined = torch.cat((input, hidden), 1)
-        hidden = self.i2h(combined)
-        output = self.h2o(combined)
-        output = self.softmax(output)
-
-        return output, hidden
-
-    def initHidden(self):
-        return Variable(torch.zeros(1, self.hidden_size))
+from model import RNN
 
 hidden_size = 256
 learning_rate = 0.01
-
-criterion = nn.NLLLoss()
-rnn = RNN(n_letters, hidden_size, n_categories)
 
 def train(category_tensor, line_tensor):
     hidden = rnn.initHidden()
@@ -64,6 +38,9 @@ plot_every = 1000
 current_loss = 0
 all_losses = []
 
+criterion = nn.NLLLoss()
+rnn = RNN(n_letters, hidden_size, n_categories)
+
 def time_since(since):
     now = time.time()
     s = now - since
@@ -86,6 +63,8 @@ for i in range(1, n_iters + 1):
     if i % plot_every == 0:
         all_losses.append(current_loss / plot_every)
         current_loss = 0
+
+torch.save(rnn, 'char-rnn-classification.pt')
 
 pyplot.figure()
 pyplot.plot(all_losses)
