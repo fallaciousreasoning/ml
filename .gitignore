@@ -3,3 +3,5 @@ data/
 tutorials/name-classifier/__pycache__/load\.cpython-36\.pyc
 
 tutorials/name-classifier/__pycache__/
+
+*.pt
