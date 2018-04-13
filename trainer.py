@@ -2,7 +2,6 @@ import torch
 
 
 dtype = torch.FloatTensor
-# dtype = torch.cuda.FloatTensor # Uncomment this to run on GPU
 
 # N is batch size; D_in is input dimension;
 # H is hidden dimension; D_out is output dimension.
@@ -18,22 +17,26 @@ w2 = torch.randn(H, D_out).type(dtype)
 
 learning_rate = 1e-6
 
-for t in range(500):
+for t in range(500): # run over 500 epochs
     h = x.mm(w1) # multiply x by the input weights
 
-    h_relu = h.clamp(min=0)
-    y_pred = h_relu.mm(w2) # multiply the h_relu by the weights matrix
+    h_relu = h.clamp(min=0) # make sure there are no negative values
+    y_pred = h_relu.mm(w2) # multiply the output from the hidden layer by the weights
 
-    loss = (y_pred - y).pow(2).sum()
-    print("Epoch:", t, "Loss:", loss)
+    loss = (y_pred - y).pow(2).sum() # loss function is the sum of the squares
 
-    grad_y_pred = 2.0 * (y_pred - y)
+    print("Epoch:", t, "Loss:", loss) # ouput how much we lost
+
+    # Begin back propogation
+    grad_y_pred = 2.0 * (y_pred - y) # the diff between prediction and reality
     grad_w2 = h_relu.t().mm(grad_y_pred)
+
     grad_h_relu = grad_y_pred.mm(w2.t())
     grad_h = grad_h_relu.clone()
     grad_h[h < 0] = 0
     grad_w1 = x.t().mm(grad_h)
 
+    # Update weights
     w1 -= learning_rate * grad_w1
     w2 -= learning_rate * grad_w2
 
