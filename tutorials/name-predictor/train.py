@@ -2,6 +2,8 @@ import random
 
 import time
 
+import math
+
 import torch
 import torch.nn as nn
 from torch.autograd import Variable
@@ -33,6 +35,11 @@ def time_since(since):
 
 start = time.time()
 
+hidden_size = 128
+learning_rate = 0.0005
+
+rnn = RNN(n_letters, hidden_size, n_letters)
+
 def train(category_tensor, line_tensor, target_tensor):
     hidden = rnn.init_hidden()
 
@@ -42,7 +49,7 @@ def train(category_tensor, line_tensor, target_tensor):
 
     for i in range(line_tensor.size()[0]):
         output, hidden = rnn(category_tensor, line_tensor[i], hidden)
-        loss += criterion(output, line_tensor[i])
+        loss += criterion(output, target_tensor[i])
 
     loss.backward()
 
@@ -52,17 +59,12 @@ def train(category_tensor, line_tensor, target_tensor):
     return output, loss.data[0] / line_tensor.size()[0]
 
 n_iterations = 100000
-print_every = 5000
+print_every = n_iterations/100
 plot_every = 1000
 
 criterion = nn.NLLLoss()
 
-hidden_size = 256
-learning_rate = 0.0005
-
-rnn = RNN(n_letters, hidden_size, n_letters)
-
-current_loss = 0
+total_loss = 0
 all_losses = []
 
 start = time.time()
@@ -77,6 +79,8 @@ for i in range(1, n_iterations + 1):
     if i % plot_every == 0:
         all_losses.append(total_loss / plot_every)
         total_loss = 0
+
+torch.save(rnn, 'char-rnn-predict.pt')
 
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
