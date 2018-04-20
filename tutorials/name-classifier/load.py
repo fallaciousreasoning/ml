@@ -28,7 +28,7 @@ def readLines(filename):
     lines = open(filename, encoding='utf-8').read().strip().split('\n')
     return [unicodeToAscii(line) for line in lines]
 
-for filename in findFiles('**/data/names/*.txt'):
+for filename in findFiles('data/names/*.txt'):
     category = filename.split('/')[-1].split('.')[0]
     all_categories.append(category)
     lines = readLines(filename)
